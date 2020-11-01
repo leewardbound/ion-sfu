@@ -1,62 +1,23 @@
-# json-rpc
+# redis signaling
 
-`ion-sfu` supports a `json-rpc` interface for connecting peers to the sfu
+*** NOT FUNCTIONAL YET *** 
 
-## Quick Start
-### Serving over http
-```
-go build cmd/signal/json-rpc/main.go
-./main -c config.toml -a ":7000"
-```
+* a Redis signaling interface for ion-sfu, send and recieve signaling messages with redis message queues
 
-### Serving over `https`
-Generate a keypair and run:
-```
-go build cmd/signal/json-rpc/main.go
-./main -c config.toml -key ./key.pem -cert ./cert.pem -a "0.0.0.0:10000"
-```
+* send join messages on topic `sfu/`, many SFU nodes will bid to lock the session; you MUST add a `pid` to your join params
 
-## API
+* send all following messages on `peer-send/{pid}` and listen on `peer-recv/{pid}` for replies
 
-### Join
-Initialize a peer connection and join a session.
-```json
-{
-    "sid": "defaultroom",
-    "offer": {
-        "type": "offer",
-        "sdp": "..."
-    }
-}
-```
-
-### Offer
-Offer a new sdp to the sfu. Called to renegotiate the peer connection, typically when tracks are added/removed.
-```json
-{
-    "desc": {
-        "type": "offer",
-        "sdp": "..."
-    }
-}
-```
+* follows the `jsonrpc` api, uses  `jsonrpc`-compatible messages like `{"method": "join", "params"...}`
 
 
-### Answer
-Answer a remote offer from the sfu. Called in response to a remote renegotiation. Typically when new tracks are added to/removed from other peers.
-```json
-{
-    "desc": {
-        "type": "answer",
-        "sdp": "..."
-    }
-}
-```
+### JSONRPC-redis bridge
 
-### Trickle
-Provide an ICE candidate.
-```json
-{
-    "candidate": "..."
-}
-```
+*** ONLY USE FOR TESTING ***
+
+* passing `-j :7000` as a CLI argument will start a jsonrpc server on `:7000`, sending all messages to redis
+
+* compatible with echotest and pubsubtest
+
+* if a client connects to sfu `1.1.1.1:7000`, but the session is on SFU `5.5.5.5`, the messages should pass
+    transparently through redis
