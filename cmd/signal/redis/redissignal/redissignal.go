@@ -82,7 +82,8 @@ func (s *redisSignal) SFUPeerBus(p *sfu.Peer) {
 				s.SendToPeer(Notify{"error", err, "2.0"})
 				continue
 			}
-			s.SendToPeer(Result{rpc.ID, answer, "2.0"})
+			message, err := json.Marshal(Result{rpc.ID, answer, "2.0"})
+			s.SendToPeer(message)
 
 		} else if rpc.Method == "answer" {
 			var negotiation Negotiation

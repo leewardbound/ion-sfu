@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	strings "strings"
 
 	log "github.com/pion/ion-log"
 	"github.com/pion/webrtc/v3"
@@ -57,7 +58,10 @@ func (s *jsonRedisSignal) Handle(ctx context.Context, conn *jsonrpc2.Conn, req *
 			replyError(err)
 			break
 		}
-		message, _ := json.Marshal(RPCCall{req.ID.String(), "offer", negotiation})
+		// TODO: why is this wrapped in quotes?
+		id := strings.Replace(req.ID.String(), "\"", "", -1)
+
+		message, _ := json.Marshal(RPCCall{id, "offer", negotiation})
 		r.LPush("peer-send/"+s.PeerID(), message)
 
 	case "answer":
@@ -97,12 +101,9 @@ func (s *jsonRedisSignal) RPCPeerBus(ctx context.Context, conn *jsonrpc2.Conn, r
 	for {
 
 		message, err := r.BRPop(0, topic).Result()
-		// Uncomment this line to see that RPCPeerBus
-		// is exiting after the first few messages?
-		//log.Infof("Got message %s", message)
 
 		if err != nil {
-			log.Errorf("sfu-bus: unrecognized %s", message)
+			log.Errorf("unrecognized %s", message)
 			continue
 		}
 
@@ -112,8 +113,12 @@ func (s *jsonRedisSignal) RPCPeerBus(ctx context.Context, conn *jsonrpc2.Conn, r
 			log.Errorf("failed to unmarshal rpc %s", message[1])
 			continue
 		}
+
+		log.Infof("RPC: %s:%s/%s", rpc.ID, rpc.ResultType, rpc.Method)
+
 		if rpc.ID != "" {
-			conn.Reply(ctx, jsonrpc2.ID{Str: rpc.ID}, rpc.Result)
+			conn.Reply(ctx, jsonrpc2.ID{Num: 0, Str: rpc.ID, IsString: true}, rpc.Result)
+			continue
 		}
 
 		packed, err := json.Marshal(rpc.Params)
