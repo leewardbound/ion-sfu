@@ -192,7 +192,7 @@ func JSONRPC(signalserver redissignal.RedisSignalServer) {
 		}
 		defer c.Close()
 
-		pid := StringWithCharset(2, charset)
+		pid := StringWithCharset(32, charset)
 
 		p := redissignal.NewJSONRedisSignal(
 			redissignal.NewRedisSignal(signalserver, pid, ""))
