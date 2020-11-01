@@ -3,10 +3,14 @@ module github.com/pion/ion-sfu
 go 1.13
 
 require (
+	github.com/alicebob/gopher-json v0.0.0-20200520072559-a9ecdc9d1d3a // indirect
+	github.com/alicebob/miniredis v2.5.0+incompatible
 	github.com/bep/debounce v1.2.0
+	github.com/elliotchance/redismock v1.5.3
 	github.com/gammazero/deque v0.0.0-20201010052221-3932da5530cc
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/golang/protobuf v1.4.3
+	github.com/gomodule/redigo v1.8.2 // indirect
 	github.com/gorilla/websocket v1.4.2
 	github.com/lucas-clemente/quic-go v0.18.1 // indirect
 	github.com/lucsky/cuid v1.0.2
@@ -21,6 +25,7 @@ require (
 	github.com/sourcegraph/jsonrpc2 v0.0.0-20200429184054-15c2290dcb37
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.6.1
+	github.com/yuin/gopher-lua v0.0.0-20200816102855-ee81675732da // indirect
 	golang.org/x/crypto v0.0.0-20201016220609-9e8e0b390897 // indirect
 	golang.org/x/net v0.0.0-20201024042810-be3efd7ff127 // indirect
 	golang.org/x/sys v0.0.0-20201024232916-9f70ab9862d5 // indirect

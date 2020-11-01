@@ -97,7 +97,9 @@ func (s *jsonRedisSignal) RPCPeerBus(ctx context.Context, conn *jsonrpc2.Conn, r
 	for {
 
 		message, err := r.BRPop(0, topic).Result()
-		log.Infof("Got message %s", message)
+		// Uncomment this line to see that RPCPeerBus
+		// is exiting after the first few messages?
+		//log.Infof("Got message %s", message)
 
 		if err != nil {
 			log.Errorf("sfu-bus: unrecognized %s", message)
@@ -119,8 +121,6 @@ func (s *jsonRedisSignal) RPCPeerBus(ctx context.Context, conn *jsonrpc2.Conn, r
 			log.Errorf("failed to marshal params %s", rpc.Params)
 			continue
 		}
-
-		log.Infof(">>> %s/%s", rpc.ResultType, rpc.Method)
 
 		if rpc.ResultType == "answer" {
 			var answer webrtc.SessionDescription
