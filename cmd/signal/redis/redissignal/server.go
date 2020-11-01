@@ -21,7 +21,7 @@ type RedisSignalServer interface {
 
 	SFUBus()
 	GetSessionNode(sid string) (string, error)
-	AttemptSessionLock(sid string) (bool, error)
+	AttemptSessionLock(sid string) (string, error)
 	RefreshSessionExpiry(sid string)
 }
 
@@ -47,12 +47,12 @@ func (s *redisSignalServer) ID() string {
 // SFUBus is the redis topic `sfu/` (for messages to all SFU, join methods)
 func (s *redisSignalServer) SFUBus() {
 	r := s.client
-	topic := "sfu/"
-	log.Infof("SFUBus started listening for messages on topic '%s'", topic)
+	topic := "sfu/" + s.nodeID
+	log.Infof("SFUBus listening on 'sfu/' and '%s'", topic)
 
 	for {
 
-		message, err := r.BRPop(0, topic).Result()
+		message, err := r.BRPop(0, topic, "sfu/").Result()
 
 		if err != nil {
 			log.Errorf("sfu-bus: unrecognized %s", message)
@@ -67,15 +67,19 @@ func (s *redisSignalServer) SFUBus() {
 			continue
 		}
 
-		exclusive_lock, err := s.AttemptSessionLock(join.Sid)
+		locked_by, err := s.AttemptSessionLock(join.Sid)
+
 		if err != nil {
 			log.Errorf("error aquiring session lock %s", err)
 		}
-		if !exclusive_lock {
-			log.Infof("another node is handling session %s, skipping join", join.Sid)
+		if locked_by != s.nodeID {
+			log.Infof("another node has session %s, forwarding join to sfu/%s", join.Sid, locked_by)
+			r.LPush("sfu/"+locked_by, message[1])
+
 			continue // another node aquired the session lock
 		}
-		log.Infof("got session lock, joining room %s", join.Sid)
+
+		log.Infof("joining room %s", join.Sid)
 
 		p := sfu.NewPeer(&s.ion)
 
@@ -117,7 +121,7 @@ func (s *redisSignalServer) GetSessionNode(sid string) (string, error) {
 }
 
 // AttemptSessionLock returns true if no other node has a session lock, and locks the session
-func (s *redisSignalServer) AttemptSessionLock(sid string) (bool, error) {
+func (s *redisSignalServer) AttemptSessionLock(sid string) (string, error) {
 	r := s.client
 
 	sessionNode, err := s.GetSessionNode(sid)
@@ -126,20 +130,20 @@ func (s *redisSignalServer) AttemptSessionLock(sid string) (bool, error) {
 
 		if err != nil {
 			log.Errorf("error locking session: %s", err)
-			return false, err
+			return "", err
 		}
 		if set {
 			s.RefreshSessionExpiry(sid)
-			return true, nil
+			return s.ID(), nil
 		} else {
-			return false, nil
+			return "", nil
 		}
 	}
 
 	if sessionNode == s.ID() {
-
+		s.RefreshSessionExpiry(sid)
 	}
-	return (sessionNode == s.ID()), err
+	return sessionNode, err
 }
 
 func (s *redisSignalServer) RefreshSessionExpiry(sid string) {

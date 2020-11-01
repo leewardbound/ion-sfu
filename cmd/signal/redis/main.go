@@ -197,7 +197,7 @@ func JSONRPC(signalserver redissignal.RedisSignalServer) {
 		p := redissignal.NewJSONRedisSignal(
 			redissignal.NewRedisSignal(signalserver, pid, ""))
 
-		//defer p.Close()
+		defer p.Close()
 
 		jc := jsonrpc2.NewConn(r.Context(), websocketjsonrpc2.NewObjectStream(c), p)
 		<-jc.DisconnectNotify()

@@ -93,6 +93,13 @@ func (s *jsonRedisSignal) Handle(ctx context.Context, conn *jsonrpc2.Conn, req *
 	//r.Expire("peer-send/"+s.PeerID(), 10*time.Second)
 }
 
+func (s *jsonRedisSignal) Close() {
+	r := s.Redis()
+	log.Infof("closing peer, sending kill message")
+	r.LPush("peer-send/"+s.PeerID(), "kill")
+	r.LPush("peer-recv/"+s.PeerID(), "kill")
+}
+
 func (s *jsonRedisSignal) RPCPeerBus(ctx context.Context, conn *jsonrpc2.Conn, req *jsonrpc2.Request) {
 	r := s.Redis()
 	topic := "peer-recv/" + s.PeerID()
@@ -105,6 +112,10 @@ func (s *jsonRedisSignal) RPCPeerBus(ctx context.Context, conn *jsonrpc2.Conn, r
 		if err != nil {
 			log.Errorf("unrecognized %s", message)
 			continue
+		}
+		if message[1] == "kill" {
+			s.Cleanup()
+			return
 		}
 
 		var rpc ResultOrNotify

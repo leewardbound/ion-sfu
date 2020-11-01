@@ -66,17 +66,17 @@
       <div class="row">
         <div class="col-6 pt-2">
           <span
-            style="position: absolute; margin-left: 5px; margin-top: 5px"
+            style="position: absolute; margin-left: 5px; margin-top: 5px;"
             class="badge badge-primary"
             >Local</span
           >
           <video
             id="local-video"
-            style="background-color: black"
+            style="background-color: black;"
             width="320"
             height="240"
           ></video>
-          <div class="controls" style="display: none">
+          <div class="controls" style="display: none;">
             <div class="row pt-3">
               <div class="col-3">
                 <strong>Video</strong>
@@ -135,31 +135,31 @@
         </div>
         <div class="col-6 pt-2">
           <span
-            style="position: absolute; margin-left: 5px; margin-top: 5px"
+            style="position: absolute; margin-left: 5px; margin-top: 5px;"
             class="badge badge-primary"
             >Remote</span
           >
           <span
             id="size-tag"
-            style="position: absolute; margin-left: 5px; top: 225px"
+            style="position: absolute; margin-left: 5px; top: 225px;"
             class="badge badge-primary"
           ></span>
           <span
             id="br-tag"
-            style="position: absolute; left: 270px; top: 225px"
+            style="position: absolute; left: 270px; top: 225px;"
             class="badge badge-primary"
           ></span>
           <video
             id="remote-video"
-            style="background-color: black"
+            style="background-color: black;"
             width="320"
             height="240"
           ></video>
-          <div class="controls" style="display: none">
+          <div class="controls" style="display: none;">
             <div class="row pt-3">
               <div class="col-3">
                 <strong>Video</strong>
-                <div id="simulcast-controls" style="display: none">
+                <div id="simulcast-controls" style="display: none;">
                   <div class="radio">
                     <label
                       ><input type="radio" onclLocal(this)" value="high"
@@ -201,7 +201,7 @@
                   </div>
                 </div>
 
-                <div id="simple-controls" style="display: none">
+                <div id="simple-controls" style="display: none;">
                   <div class="radio">
                     <label
                       ><input
@@ -258,7 +258,7 @@
             <pre
               id="api"
               class="d-block border"
-              style="background-color: #f8f9fa; height: 117px"
+              style="background-color: #f8f9fa; height: 117px;"
             ></pre>
           </div>
         </div>
@@ -301,7 +301,7 @@
       const joinBtns = document.getElementById("start-btns");
 
       const signalLocal = new IonSDK.IonSFUJSONRPCSignal(
-        "ws://localhost:7000/ws"
+        "ws://localhost:7001/ws"
       );
       const signalRemote = new IonSDK.IonSFUJSONRPCSignal(
         "ws://localhost:7000/ws"

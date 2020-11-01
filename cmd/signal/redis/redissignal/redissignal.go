@@ -14,6 +14,7 @@ type RedisSignal interface {
 	Redis() *redis.Client
 	PeerID() string
 	SessionID() string
+	Cleanup()
 	SendToPeer(value interface{})
 }
 
@@ -47,6 +48,12 @@ func (s *redisSignal) SendToPeer(value interface{}) {
 	//r.Expire("peer-recv/"+s.pid, 10*time.Second)
 }
 
+func (s *redisSignal) Cleanup() {
+	r := s.server.RedisClient()
+	r.Del("peer-recv/" + s.pid)
+	r.Del("peer-send/" + s.pid)
+}
+
 // SFUPeerBus watches on peer-send/{pid} for messages from peer
 func (s *redisSignal) SFUPeerBus(p *sfu.Peer) {
 	r := s.server.RedisClient()
@@ -62,6 +69,11 @@ func (s *redisSignal) SFUPeerBus(p *sfu.Peer) {
 		if err != nil {
 			log.Errorf("unrecognized %s", message)
 			continue
+		}
+		if message[1] == "kill" {
+			log.Infof("peer %s disconnected, killing sfu bus", s.pid)
+			p.Close()
+			return
 		}
 
 		var rpc ResultOrNotify
